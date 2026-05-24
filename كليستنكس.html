@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>كليستنكس - تدريبات وزن الجسم</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+body{background:#0a0a15;color:#e0e0e0;overflow-x:hidden}
+.topbar{background:#1a1a2e;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e94560;position:sticky;top:0;z-index:100}
+.topbar h1{font-size:18px;color:#e94560}
+.tabs{display:flex;background:#1a1a2e;padding:8px;gap:6px;position:sticky;top:54px;z-index:99;overflow-x:auto}
+.tab{flex:1;padding:8px;text-align:center;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;transition:all .2s;background:#0f0f1a;color:#888;white-space:nowrap;touch-action:manipulation}
+.tab.active{background:#e94560;color:#fff}
+.tab:hover{background:#2a2a4a}
+.main{padding:16px;max-width:800px;margin:0 auto;padding-bottom:100px}
+.section{display:none}
+.section.active{display:block}
+.card{background:#1a1a2e;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #2a2a4a}
+.card-title{font-size:15px;font-weight:bold;color:#e94560;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.card p{font-size:13px;line-height:1.7;color:#ccc}
+.exercise{display:flex;align-items:center;gap:12px;padding:12px;background:#0f0f1a;border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .2s;touch-action:manipulation}
+.exercise:active{transform:scale(.98)}
+  .exercise .thumb{width:45px;height:45px;flex-shrink:0;border-radius:8px;overflow:hidden}
+  .exercise .thumb img{width:100%;height:100%;object-fit:cover}
+.exercise .icon{font-size:24px;width:40px;text-align:center}
+.exercise .info{flex:1}
+.exercise .name{font-size:14px;font-weight:bold;color:#fff}
+.exercise .desc{font-size:12px;color:#888}
+.exercise .level{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:bold}
+.level-beginner{background:#27ae60;color:#fff}
+.level-intermediate{background:#f39c12;color:#fff}
+.level-advanced{background:#e74c3c;color:#fff}
+.plan-card{background:#1a1a2e;border-radius:14px;padding:16px;margin-bottom:12px;border:2px solid #2a2a4a;cursor:pointer;transition:all .2s;touch-action:manipulation}
+.plan-card:active{transform:scale(.98)}
+.plan-card.selected{border-color:#e94560}
+.plan-card .plan-title{font-size:16px;font-weight:bold;color:#e94560;margin-bottom:4px}
+.plan-card .plan-desc{font-size:13px;color:#888;margin-bottom:8px}
+.plan-card .plan-stats{display:flex;gap:12px;font-size:12px;color:#aaa}
+.plan-card .plan-stats span{display:flex;align-items:center;gap:4px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:bold;cursor:pointer;transition:all .2s;margin:8px 0;touch-action:manipulation}
+.btn-primary{background:#e94560;color:#fff}
+.btn-primary:hover{background:#d63851}
+.btn-primary:active{transform:scale(.97)}
+.btn-success{background:#27ae60;color:#fff}
+.btn-success:hover{background:#219a52}
+.btn-outline{background:transparent;color:#e94560;border:2px solid #e94560}
+.btn-outline:hover{background:#e94560;color:#fff}
+.timer-box{text-align:center;padding:30px}
+.timer-box .time{font-size:64px;font-weight:bold;color:#fff;font-family:monospace}
+.timer-box .phase{font-size:16px;color:#e94560;margin-top:8px;font-weight:bold}
+.timer-box .ex-name{font-size:14px;color:#888;margin-top:4px}
+.timer-controls{display:flex;gap:10px;margin-top:20px;justify-content:center}
+.timer-controls button{padding:12px 24px;border:none;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;touch-action:manipulation}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;justify-content:center;align-items:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#1a1a2e;border-radius:16px;padding:24px;max-width:400px;width:100%;max-height:80vh;overflow-y:auto;border:1px solid #2a2a4a}
+.modal h2{color:#e94560;font-size:18px;margin-bottom:12px}
+.modal p{font-size:14px;line-height:1.7;color:#ccc;margin-bottom:8px}
+.modal .close-btn{background:#2a2a4a;border:none;color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;margin-top:12px;font-size:13px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#e0e0e0;padding:10px 24px;border-radius:10px;border:1px solid #2a2a4a;font-size:13px;z-index:300;display:none;animation:fadeIn .3s}
+.toast.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.checkbox{width:20px;height:20px;border:2px solid #555;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.checkbox.done{border-color:#27ae60;background:#27ae60;color:#fff;font-size:12px}
+.progress-bar{height:6px;background:#2a2a4a;border-radius:6px;overflow:hidden;margin:12px 0}
+.progress-bar .fill{height:100%;background:#e94560;border-radius:6px;transition:width .4s}
+@media(max-width:400px){.timer-box .time{font-size:48px}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><h1>🏋️ كليستنكس</h1></div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('exercises')">📋 تمارين</div>
+  <div class="tab" onclick="showTab('plans')">📅 برامج</div>
+  <div class="tab" onclick="showTab('timer')">⏱ تمـريـن</div>
+  <div class="tab" onclick="showTab('progress')">📊 تقدمي</div>
+  <div class="tab" onclick="showTab('info')">ℹ️ معلومات</div>
+</div>
+
+<div class="main">
+  <!-- ===== التمارين ===== -->
+  <div class="section active" id="sec-exercises">
+    <div class="card"><div class="card-title">📋 جميع تمارين الكليستنكس</div></div>
+    <div id="exerciseList"></div>
+  </div>
+
+  <!-- ===== البرامج ===== -->
+  <div class="section" id="sec-plans">
+    <div class="card"><div class="card-title">📅 اختر برنامجك التدريبي</div></div>
+    <div id="planList"></div>
+    <button class="btn btn-primary" onclick="startSelectedPlan()">▶ بدء التمرين</button>
+  </div>
+
+  <!-- ===== التايمر ===== -->
+  <div class="section" id="sec-timer">
+    <div class="timer-box" id="timerBox">
+      <div style="width:120px;height:120px;margin:0 auto 12px" id="timerSvg"></div>
+      <div class="time" id="timerDisplay">00:00</div>
+      <div class="phase" id="timerPhase">جاهز؟</div>
+      <div class="ex-name" id="timerExName">اضغط ابدأ</div>
+    </div>
+    <div class="progress-bar"><div class="fill" id="timerProgress" style="width:0%"></div></div>
+    <div id="currentExerciseList"></div>
+    <div class="timer-controls">
+      <button class="btn-success" id="startBtn" onclick="startTimer()">▶ ابدأ</button>
+      <button class="btn-outline" id="pauseBtn" style="display:none" onclick="pauseTimer()">⏸ إيقاف</button>
+      <button class="btn-outline" id="resetBtn" style="display:none" onclick="resetTimer()">↺ إعادة</button>
+    </div>
+  </div>
+
+  <!-- ===== التقدم ===== -->
+  <div class="section" id="sec-progress">
+    <div class="card"><div class="card-title">📊 تقدمك</div></div>
+    <div id="progressStats"></div>
+    <button class="btn btn-outline" onclick="resetProgress()" style="margin-top:12px">🔄 إعادة تعيين التقدم</button>
+  </div>
+
+  <!-- ===== المعلومات ===== -->
+  <div class="section" id="sec-info">
+    <div class="card">
+      <div class="card-title">ℹ️ عن التطبيق</div>
+      <p>تطبيق كليستنكس لتدريبات وزن الجسم. تمارين منزلية بدون معدات.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🔒 الخصوصية</div>
+      <p>هذا التطبيق <b>لا يجمع أي معلومات شخصية</b> ولا يستخدم ملفات تعريف الارتباط. كل بيانات تقدمك تخزن محلياً في جهازك فقط.</p>
+      <p style="text-align:center;margin-top:10px"><a href="privacy.html" target="_blank" style="color:#e94560;text-decoration:none;background:#0f0f1a;padding:10px 20px;border-radius:8px;display:inline-block">🔒 عرض سياسة الخصوصية كاملة</a></p>
+    </div>
+    <div class="card">
+      <div class="card-title">📱 تواصل معي</div>
+      <p style="text-align:center;margin-bottom:12px">إذا كان عندك اقتراح أو استفسار:</p>
+      <p style="text-align:center;font-size:24px;font-weight:bold;color:#25D366;margin-bottom:12px"><a href="https://wa.me/213655797189" target="_blank" style="color:#25D366;text-decoration:none;background:#0f0f1a;padding:12px 24px;border-radius:12px;display:inline-block">📱 0655797189</a></p>
+      <p style="text-align:center;font-size:13px;color:#888">اضغط على الرقم للتواصل مباشرة عبر واتساب</p>
+    </div>
+  </div>
+</div>
+
+<!-- مودال شرح التمرين -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- زر واتساب عائم -->
+<a href="https://wa.me/213655797189" target="_blank" id="whatsappFloat" style="position:fixed;bottom:20px;left:20px;background:#25D366;color:#fff;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 4px 15px rgba(37,211,102,.4);z-index:999;text-decoration:none;transition:all .3s;touch-action:manipulation" title="تواصل معي">💬</a>
+
+<script>
+// ======================== البيانات ========================
+// صور حقيقية من wger.de (رخصة حرة) - real human exercise photos
+const exImages = {
+  pushup:'https://wger.de/media/exercise-images/1551/a6a9e561-3965-45c6-9f2b-ee671e1a3a45.png',
+  squat:'https://wger.de/media/exercise-images/927/7b392101-9c47-4693-935e-a88b1887eec5.jpg',
+  plank:'https://wger.de/media/exercise-images/1080/c4bf7ba1-6058-4d14-928f-7187885d5d57.webp',
+  pullup:'https://wger.de/media/exercise-images/475/b0554016-16fd-4dbe-be47-a2a17d16ae0e.jpg',
+  dips:'https://wger.de/media/exercise-images/1084/91dd5a95-1c45-46f2-a074-de41b6ad599b.jpg',
+  burpee:'https://wger.de/media/exercise-images/1086/b2ee8d9b-0480-4992-8494-c223b37c2696.jpg',
+  lunge:'https://wger.de/media/exercise-images/1087/d85f4e02-b20c-457c-bdfb-0b00e2d14150.jpg',
+  bridge:'https://wger.de/media/exercise-images/203/1c052351-2af0-4227-aeb0-244008e4b0a8.jpeg',
+  run:'https://wger.de/media/exercise-images/1088/9f66b288-ce8f-4154-ba80-78fee267263c.jpg',
+  stretch:'https://wger.de/media/exercise-images/478/70a2d72-c822-45f3-8de2-54ea85951b84.jpg',
+  l_sit:'https://wger.de/media/exercise-images/184/1709c405-620a-4d07-9658-fade2b66a2df.jpeg',
+  climb:'https://wger.de/media/exercise-images/1185/c5ca283d-8958-4fd8-9d59-a3f52a3ac66b.jpg',
+  sideplank:'https://wger.de/media/exercise-images/691/297d4ce1-7e9e-4adb-8f5c-7d54054be885.jpg',
+  wall_sit:'https://wger.de/media/exercise-images/1186/1987a039-cf35-437e-bbdc-40c53dd7d053.jpg',
+  jump:'https://wger.de/media/exercise-images/1554/49207a62-8799-4b47-8c0b-7bde02926f3d.png'
+};
+
+const exercises = [
+  {id:0, icon:"💪", name:"Push Up (ضغط)", desc:"تمارين الصدر والذراعين", level:"beginner", time:45, rest:15, svg:"pushup"},
+  {id:1, icon:"🦵", name:"Squat (قرفصاء)", desc:"تمارين الرجلين والمؤخرة", level:"beginner", time:45, rest:15, svg:"squat"},
+  {id:2, icon:"⬇️", name:"Plank (بلانك)", desc:"تمارين البطن والظهر", level:"beginner", time:30, rest:20, svg:"plank"},
+  {id:3, icon:"⬆️", name:"Pull Up (سحب)", desc:"تمارين الظهر والذراعين", level:"intermediate", time:30, rest:30, svg:"pullup"},
+  {id:4, icon:"🔻", name:"Dips (غطس)", desc:"تمارين الصدر والترايسبس", level:"intermediate", time:30, rest:20, svg:"dips"},
+  {id:5, icon:"🔥", name:"Burpee (بيربي)", desc:"تمرين كامل للجسم", level:"intermediate", time:30, rest:20, svg:"burpee"},
+  {id:6, icon:"🦅", name:"Archer Push Up", desc:"ضغط مائل - صدر وكتف", level:"advanced", time:25, rest:25, svg:"pushup"},
+  {id:7, icon:"🐸", name:"Pistol Squat", desc:"قرفصاء برجل واحدة", level:"advanced", time:25, rest:30, svg:"squat"},
+  {id:8, icon:"🌀", name:"Muscle Up", desc:"سحب مع ضغط - متقدم", level:"advanced", time:20, rest:35, svg:"pullup"},
+  {id:9, icon:"📐", name:"L-Sit", desc:"الجلوس بشكل L", level:"intermediate", time:20, rest:25, svg:"l_sit"},
+  {id:10, icon:"🏃", name:"High Knees", desc:"ركض في المكان", level:"beginner", time:40, rest:15, svg:"run"},
+  {id:11, icon:"🔄", name:"Mountain Climber", desc:"تسلق الجبال", level:"beginner", time:40, rest:15, svg:"climb"},
+  {id:12, icon:"📏", name:"Side Plank", desc:"بلانك جانبي", level:"intermediate", time:25, rest:20, svg:"sideplank"},
+  {id:13, icon:"💥", name:"Clap Push Up", desc:"ضغط مع تصفيق", level:"advanced", time:20, rest:25, svg:"pushup"},
+  {id:14, icon:"🌉", name:"Glute Bridge", desc:"رفع الحوض", level:"beginner", time:40, rest:15, svg:"bridge"},
+  {id:15, icon:"🦋", name:"Cobra Stretch", desc:"تمدد الكوبرا", level:"beginner", time:30, rest:10, svg:"stretch"},
+  {id:16, icon:"⬆️", name:"Chin Up", desc:"سحب عكسي", level:"intermediate", time:25, rest:25, svg:"pullup"},
+  {id:17, icon:"💎", name:"Diamond Push Up", desc:"ضغط ماسي - ترايسبس", level:"intermediate", time:30, rest:20, svg:"pushup"},
+  {id:18, icon:"🔁", name:"Jump Squat", desc:"قرفصاء مع قفز", level:"intermediate", time:30, rest:15, svg:"jump"},
+  {id:19, icon:"🧘", name:"Wall Sit", desc:"الجلوس على الحائط", level:"beginner", time:35, rest:15, svg:"wall_sit"}
+];
+
+const plans = [
+  {
+    id:0, name:"🌟 مبتدئ", desc:"للمبتدئين - 20 دقيقة", icon:"🌱",
+    exercises:[0,10,11,2,14,15], rounds:2,
+    stats:"6 تمارين × 2 جولات"
+  },
+  {
+    id:1, name:"🔥 متوسط", desc:"للمتوسطين - 30 دقيقة", icon:"💪",
+    exercises:[0,1,3,4,5,9,12,17], rounds:3,
+    stats:"8 تمارين × 3 جولات"
+  },
+  {
+    id:2, name:"⚡ متقدم", desc:"للمتقدمين - 40 دقيقة", icon:"🔥",
+    exercises:[6,7,8,13,3,4,5,18], rounds:3,
+    stats:"8 تمارين × 3 جولات"
+  },
+  {
+    id:3, name:"🎯 صدر وذراعين", desc:"تركيز على الصدر والذراعين", icon:"💪",
+    exercises:[0,4,17,13,3,16], rounds:3,
+    stats:"6 تمارين × 3 جولات"
+  },
+  {
+    id:4, name:"🦵 رجلين وبطن", desc:"تركيز على الرجلين والبطن", icon:"🦵",
+    exercises:[1,7,18,2,12,11], rounds:3,
+    stats:"6 تمارين × 3 جولات"
+  },
+  {
+    id:5, name:"⚡ HIIT", desc:"حرق دهون مكثف - 15 دقيقة", icon:"🔥",
+    exercises:[10,5,11,18,6,13], rounds:2,
+    stats:"6 تمارين × 2 جولات - راحة 10ث"
+  }
+];
+
+// ======================== المتغيرات ========================
+let selectedPlan = null;
+let timerRunning = false;
+let timerPaused = false;
+let timerInterval = null;
+let currentExIdx = 0;
+let currentRound = 0;
+let isRest = false;
+let timeLeft = 0;
+let totalTime = 0;
+let elapsedTime = 0;
+let workoutExercises = [];
+
+// حفظ التقدم
+function getProgress() {
+  try { return JSON.parse(localStorage.getItem("caliProgress")) || {}; } catch { return {}; }
+}
+function saveProgress(p) { localStorage.setItem("caliProgress", JSON.stringify(p)); }
+function getLog() {
+  try { return JSON.parse(localStorage.getItem("caliLog")) || []; } catch { return []; }
+}
+function saveLog(l) { localStorage.setItem("caliLog", JSON.stringify(l)); }
+
+// ======================== عرض التمارين ========================
+function renderExercises() {
+  const list = document.getElementById("exerciseList");
+  const progress = getProgress();
+  list.innerHTML = exercises.map(ex => {
+    const done = progress[ex.id];
+    const lvl = {beginner:"مبتدئ", intermediate:"متوسط", advanced:"متقدم"}[ex.level];
+    const lvlClass = `level-${ex.level}`;
+    const img = exImages[ex.svg] || "";
+    return `<div class="exercise" onclick="showExercise(${ex.id})">
+      <div class="checkbox ${done ? 'done' : ''}">${done ? '✓' : ''}</div>
+      <div class="thumb">${img ? `<img src="${img}" alt="${ex.name}" loading="lazy">` : ''}</div>
+      <div class="info">
+        <div class="name">${ex.name}</div>
+        <div class="desc">${ex.desc}</div>
+      </div>
+      <span class="level ${lvlClass}">${lvl}</span>
+    </div>`;
+  }).join("");
+}
+
+// ======================== عرض البرامج ========================
+function renderPlans() {
+  const list = document.getElementById("planList");
+  list.innerHTML = plans.map(p => `
+    <div class="plan-card ${selectedPlan === p.id ? 'selected' : ''}" onclick="selectPlan(${p.id})">
+      <div class="plan-title">${p.icon} ${p.name}</div>
+      <div class="plan-desc">${p.desc}</div>
+      <div class="plan-stats">
+        <span>⏱ ${p.stats}</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+function selectPlan(id) {
+  selectedPlan = id;
+  renderPlans();
+}
+
+function startSelectedPlan() {
+  if (selectedPlan === null) { showToast("⚠️ اختر برنامج أولاً"); return; }
+  const plan = plans[selectedPlan];
+  // بناء قائمة التمارين مع الجولات
+  workoutExercises = [];
+  for (let r = 0; r < plan.rounds; r++) {
+    plan.exercises.forEach(exId => {
+      workoutExercises.push({exerciseId:exId, round:r+1});
+    });
+  }
+  // إضافة راحة بين الجولات
+  currentExIdx = 0;
+  currentRound = 0;
+  showTab("timer");
+  prepareTimer();
+}
+
+// ======================== التايمر ========================
+function prepareTimer() {
+  if (workoutExercises.length === 0) return;
+  const ex = exercises[workoutExercises[currentExIdx].exerciseId];
+  const round = workoutExercises[currentExIdx].round;
+  const totalExs = workoutExercises.length;
+  
+  // إظهار القائمة
+  renderCurrentExercises();
+  
+  document.getElementById("timerExName").textContent = `${ex.icon} ${ex.name}`;
+  const timerImg = exImages[ex.svg];
+  document.getElementById("timerSvg").innerHTML = timerImg ? `<img src="${timerImg}" alt="${ex.name}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">` : (ex.icon || '');
+  document.getElementById("timerPhase").textContent = `جولة ${round} من ${Math.max(...workoutExercises.map(w=>w.round))} | تمرين ${currentExIdx+1} من ${totalExs}`;
+  document.getElementById("timerDisplay").textContent = formatTime(ex.time);
+  timeLeft = ex.time;
+  totalTime = ex.time;
+  isRest = false;
+  document.getElementById("timerProgress").style.width = "0%";
+  
+  document.getElementById("startBtn").style.display = "inline-block";
+  document.getElementById("pauseBtn").style.display = "none";
+  document.getElementById("resetBtn").style.display = "none";
+  timerRunning = false;
+}
+
+function renderCurrentExercises() {
+  const container = document.getElementById("currentExerciseList");
+  if (workoutExercises.length === 0) { container.innerHTML = ""; return; }
+  container.innerHTML = workoutExercises.map((w, i) => {
+    const ex = exercises[w.exerciseId];
+    const img = exImages[ex.svg] || "";
+    const active = i === currentExIdx ? "style='background:#2a2a4a;border:1px solid #e94560'" : "";
+    const done = i < currentExIdx ? "style='opacity:.4'" : "";
+    return `<div class="exercise" ${active} ${done}>
+      <div class="checkbox ${i < currentExIdx ? 'done' : ''}">${i < currentExIdx ? '✓' : ''}</div>
+      <div class="thumb">${img ? `<img src="${img}" alt="${ex.name}" loading="lazy">` : ''}</div>
+      <div class="info"><div class="name">${ex.name}</div><div class="desc">جولة ${w.round}</div></div>
+    </div>`;
+  }).join("");
+  // التمرير للتمرين الحالي
+  const activeEl = container.querySelector(".exercise[style*='border']");
+  if (activeEl) activeEl.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+function startTimer() {
+  if (workoutExercises.length === 0) return;
+  timerRunning = true;
+  timerPaused = false;
+  document.getElementById("startBtn").style.display = "none";
+  document.getElementById("pauseBtn").style.display = "inline-block";
+  document.getElementById("resetBtn").style.display = "inline-block";
+  
+  timerInterval = setInterval(() => {
+    if (!timerPaused) {
+      timeLeft--;
+      const progress = ((totalTime - timeLeft) / totalTime) * 100;
+      document.getElementById("timerProgress").style.width = `${Math.min(progress, 100)}%`;
+      document.getElementById("timerDisplay").textContent = formatTime(timeLeft);
+      
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        if (isRest) {
+          // انتهت الراحة → التمرين التالي
+          isRest = false;
+          currentExIdx++;
+          if (currentExIdx >= workoutExercises.length) {
+            finishWorkout();
+            return;
+          }
+          prepareTimer();
+          startTimer();
+        } else {
+          // انتهى التمرين → راحة أو تمرين تالي
+          markExerciseDone(workoutExercises[currentExIdx].exerciseId);
+          if (currentExIdx + 1 >= workoutExercises.length) {
+            finishWorkout();
+            return;
+          }
+          // شوف إذا لازم راحة
+          const nextEx = exercises[workoutExercises[currentExIdx + 1].exerciseId];
+          isRest = true;
+          timeLeft = nextEx.rest || 15;
+          totalTime = timeLeft;
+          document.getElementById("timerDisplay").textContent = formatTime(timeLeft);
+          document.getElementById("timerPhase").textContent = "💤 راحة";
+          document.getElementById("timerExName").textContent = `${nextEx.icon} ${nextEx.name}`;
+          document.getElementById("timerProgress").style.width = "0%";
+          timerInterval = setInterval(arguments.callee, 1000);
+        }
+      }
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  timerPaused = !timerPaused;
+  document.getElementById("pauseBtn").textContent = timerPaused ? "▶ استمرار" : "⏸ إيقاف";
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  prepareTimer();
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+}
+
+function markExerciseDone(id) {
+  const p = getProgress();
+  p[id] = true;
+  saveProgress(p);
+  renderExercises();
+}
+
+function finishWorkout() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById("timerPhase").textContent = "🎉 أكملت التمرين!";
+  document.getElementById("timerExName").textContent = "أحسنت! 🏆";
+  document.getElementById("timerDisplay").textContent = "🎯";
+  document.getElementById("startBtn").style.display = "none";
+  document.getElementById("pauseBtn").style.display = "none";
+  document.getElementById("resetBtn").style.display = "inline-block";
+  document.getElementById("resetBtn").textContent = "🔄 تمرين جديد";
+  
+  // تسجيل التمرين
+  const log = getLog();
+  log.push({date:new Date().toISOString(), plan:selectedPlan, exercises:workoutExercises.length});
+  saveLog(log);
+  renderProgress();
+  showToast("🎉 تمرين رائع! أكملت التمرين بنجاح");
+}
+
+// ======================== عرض التمرين ========================
+function showExercise(id) {
+  const ex = exercises[id];
+  const lvl = {beginner:"🟢 مبتدئ", intermediate:"🟡 متوسط", advanced:"🔴 متقدم"}[ex.level];
+  const img = exImages[ex.svg] || "";
+  document.getElementById("modalContent").innerHTML = `
+    <h2>${ex.icon} ${ex.name}</h2>
+    <div style="text-align:center;margin:12px 0;background:#0f0f1a;border-radius:12px;padding:12px">${img ? `<img src="${img}" alt="${ex.name}" style="max-width:100%;height:auto;border-radius:10px;max-height:200px">` : ex.icon}</div>
+    <p>${ex.desc}</p>
+    <p><b>المستوى:</b> ${lvl}</p>
+    <p><b>⏱ وقت التمرين:</b> ${ex.time} ثانية</p>
+    <p><b>💤 وقت الراحة:</b> ${ex.rest} ثانية</p>
+    <button class="close-btn" onclick="document.getElementById('modalOverlay').classList.remove('show')">✕ إغلاق</button>
+  `;
+  document.getElementById("modalOverlay").classList.add("show");
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById("modalOverlay"))
+    document.getElementById("modalOverlay").classList.remove("show");
+}
+
+// ======================== التقدم ========================
+function renderProgress() {
+  const container = document.getElementById("progressStats");
+  const log = getLog();
+  const progress = getProgress();
+  const doneCount = Object.values(progress).filter(Boolean).length;
+  const totalExs = exercises.length;
+  const completedWorkouts = log.length;
+  
+  // آخر 7 أيام
+  const last7 = log.filter(l => {
+    const d = new Date(l.date);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return d >= weekAgo;
+  }).length;
+  
+  container.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:16px">
+      <div class="card" style="text-align:center"><div style="font-size:28px;font-weight:bold;color:#e94560">${Math.round((doneCount/totalExs)*100)}%</div><div style="font-size:12px;color:#888">تمارين متقنة</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:28px;font-weight:bold;color:#27ae60">${completedWorkouts}</div><div style="font-size:12px;color:#888">تمارين كاملة</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:28px;font-weight:bold;color:#f39c12">${last7}</div><div style="font-size:12px;color:#888">هذا الأسبوع</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📈 إنجازاتك</div>
+      <p>${doneCount === totalExs ? '🏆 أتقنت جميع التمارين!' : doneCount > 10 ? '🔥 مستمر! حافظ على التقدم' : '💪 ابدأ رحلتك اليوم!'}</p>
+      <div class="progress-bar"><div class="fill" style="width:${(doneCount/totalExs)*100}%"></div></div>
+      <p style="font-size:12px;color:#888;text-align:center">${doneCount} من ${totalExs} تمرين متقن</p>
+    </div>
+    ${log.length > 0 ? `
+    <div class="card">
+      <div class="card-title">📅 آخر التمارين</div>
+      ${log.slice(-5).reverse().map(l => `<p style="font-size:12px;color:#888;margin-bottom:4px">🏋️ ${new Date(l.date).toLocaleDateString("ar-SA")} - ${l.exercises} تمرين</p>`).join("")}
+    </div>` : ""}
+  `;
+}
+
+function resetProgress() {
+  if (confirm("هل تريد إعادة تعيين كل التقدم؟")) {
+    localStorage.removeItem("caliProgress");
+    localStorage.removeItem("caliLog");
+    renderExercises();
+    renderProgress();
+    showToast("🔄 تم إعادة التعيين");
+  }
+}
+
+// ======================== التنقل ========================
+function showTab(name) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById(`sec-${name}`).classList.add("active");
+  document.querySelector(`.tab[onclick*="${name}"]`).classList.add("active");
+  if (name === "exercises") renderExercises();
+  if (name === "plans") renderPlans();
+  if (name === "progress") renderProgress();
+  if (name === "timer" && workoutExercises.length === 0) {
+    document.getElementById("timerDisplay").textContent = "00:00";
+    document.getElementById("timerPhase").textContent = "اختر برنامجاً أولاً";
+    document.getElementById("timerExName").textContent = "📅 اذهب إلى البرامج";
+  }
+}
+
+// ======================== التوست ========================
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+// ======================== التهيئة ========================
+renderExercises();
+renderPlans();
+renderProgress();
+</script>
+</body>
+</html>
