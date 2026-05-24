@@ -1,6 +1,6 @@
 {
-  "name": "دروس بايثون",
-  "short_name": "دروس بايثون",
+  "name": "تعلم البايثون بلغة العربية",
+  "short_name": "تعلم البايثون",
   "description": "جميع دروس Python بالعربية - تطبيق تعليمي شامل",
   "start_url": "https://ddabdo411-a11y.github.io/python-lessons/index.html",
   "display": "standalone",
