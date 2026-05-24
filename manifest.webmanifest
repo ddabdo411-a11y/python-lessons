@@ -1,0 +1,20 @@
+{
+  "name": "دروس بايثون",
+  "short_name": "دروس بايثون",
+  "description": "جميع دروس Python بالعربية - تطبيق تعليمي شامل",
+  "start_url": "https://ddabdo411-a11y.github.io/python-lessons/index.html",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#e94560",
+  "orientation": "portrait",
+  "scope": "/python-lessons/",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231a1a2e'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle'%3E🐍%3C/text%3E%3C/svg%3E",
+      "sizes": "100x100",
+      "type": "image/svg+xml"
+    }
+  ]
+}
