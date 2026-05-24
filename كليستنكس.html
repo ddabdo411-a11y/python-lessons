@@ -332,6 +332,7 @@ function startTimer() {
   if (workoutExercises.length === 0) return;
   timerRunning = true;
   timerPaused = false;
+  playStart();
   document.getElementById("startBtn").style.display = "none";
   document.getElementById("pauseBtn").style.display = "inline-block";
   document.getElementById("resetBtn").style.display = "inline-block";
@@ -355,7 +356,11 @@ function startTimer() {
           markExerciseDone(workoutExercises[currentExIdx].exerciseId);
           if (currentExIdx + 1 >= workoutExercises.length) { finishWorkout(); return; }
           const nextEx = exercises[workoutExercises[currentExIdx + 1].exerciseId];
+          playComplete();
+          if (currentExIdx + 1 >= workoutExercises.length) { finishWorkout(); return; }
+          const nextEx = exercises[workoutExercises[currentExIdx + 1].exerciseId];
           isRest = true;
+          playRest();
           timeLeft = nextEx.rest || 15;
           totalTime = timeLeft;
           document.getElementById("timerDisplay").textContent = formatTime(timeLeft);
@@ -387,6 +392,80 @@ function formatTime(s) {
   return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
 }
 
+// ======================== أصوات تشجيع بنت ورجل ========================
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, duration, type, vol) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol || 0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+// أصوات نغمات كخلفية
+function playTada() {
+  [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.15, 'sine', 0.2), i*80));
+}
+function playFanfare() {
+  [523, 587, 659, 784, 880, 1047, 1319].forEach((f, i) => setTimeout(() => playTone(f, 0.18, 'sine', 0.2), i*70));
+  setTimeout(() => playTone(1319, 0.5, 'sine', 0.25), 600);
+}
+function playBeep() {
+  playTone(440, 0.08, 'sine', 0.15);
+}
+function playSoft() {
+  playTone(330, 0.12, 'triangle', 0.15);
+}
+// أصوات بشرية بنت ورجل باستخدام SpeechSynthesis
+let voiceIdx = 0;
+const voicePhrases = {
+  girl: ["أحسنت!", "ممتاز!", "رائع!", "استمر!", "أنتِ قوية!", "الله يقويك!", "شجاعة!", "ماشاء الله!"],
+  man: ["أحسنت!", "ممتاز!", "رائع!", "استمر!", "أنت قوي!", "الله يقويك!", "بطل!", "ماشاء الله!"]
+};
+function speak(phrases, gender) {
+  try {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const msg = new SpeechSynthesisUtterance(phrases[voiceIdx % phrases.length]);
+    voiceIdx++;
+    msg.lang = "ar-SA";
+    msg.rate = gender === 'girl' ? 1.2 : 0.9;
+    msg.pitch = gender === 'girl' ? 1.5 : 0.7;
+    msg.volume = 0.8;
+    const voices = window.speechSynthesis.getVoices();
+    const arVoice = voices.find(v => v.lang.startsWith("ar"));
+    if (arVoice) msg.voice = arVoice;
+    window.speechSynthesis.speak(msg);
+  } catch(e) {}
+}
+// تشغيل حسب الحدث
+function playComplete() {
+  playTada();
+  setTimeout(() => speak(voicePhrases.girl, 'girl'), 300);
+}
+function playVictory() {
+  playFanfare();
+  setTimeout(() => speak(voicePhrases.man, 'man'), 400);
+  setTimeout(() => speak(voicePhrases.girl, 'girl'), 2000);
+}
+function playStart() {
+  playBeep();
+}
+function playRest() {
+  playSoft();
+}
+
 function markExerciseDone(id) {
   const p = getProgress();
   p[id] = true;
@@ -397,6 +476,7 @@ function markExerciseDone(id) {
 function finishWorkout() {
   clearInterval(timerInterval);
   timerRunning = false;
+  playVictory();
   document.getElementById("timerImgWrap").classList.remove("pulse");
   document.getElementById("timerPhase").textContent = "🎉 أكملت التمرين!";
   document.getElementById("timerExName").textContent = "أحسنت! 🏆";
@@ -495,6 +575,8 @@ function showToast(msg) {
 renderExercises();
 renderPlans();
 renderProgress();
+// تحميل أصوات SpeechSynthesis مبكراً
+if (window.speechSynthesis) window.speechSynthesis.getVoices();
 </script>
 </body>
 </html>
