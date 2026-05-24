@@ -328,6 +328,40 @@ function renderCurrentExercises() {
   if (activeEl) activeEl.scrollIntoView({behavior:"smooth", block:"center"});
 }
 
+function tick() {
+  if (!timerPaused) {
+    timeLeft--;
+    const progress = ((totalTime - timeLeft) / totalTime) * 100;
+    document.getElementById("timerProgress").style.width = `${Math.min(progress, 100)}%`;
+    document.getElementById("timerDisplay").textContent = formatTime(timeLeft);
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      document.getElementById("timerImgWrap").classList.remove("pulse");
+      if (isRest) {
+        isRest = false;
+        currentExIdx++;
+        if (currentExIdx >= workoutExercises.length) { finishWorkout(); return; }
+        prepareTimer();
+        startTimer();
+      } else {
+        markExerciseDone(workoutExercises[currentExIdx].exerciseId);
+        if (currentExIdx + 1 >= workoutExercises.length) { finishWorkout(); return; }
+        playComplete();
+        const nextEx = exercises[workoutExercises[currentExIdx + 1].exerciseId];
+        isRest = true;
+        playRest();
+        timeLeft = nextEx.rest || 15;
+        totalTime = timeLeft;
+        document.getElementById("timerDisplay").textContent = formatTime(timeLeft);
+        document.getElementById("timerPhase").textContent = "💤 راحة";
+        document.getElementById("timerExName").textContent = `${nextEx.icon} ${nextEx.name}`;
+        document.getElementById("timerProgress").style.width = "0%";
+        timerInterval = setInterval(tick, 1000);
+      }
+    }
+  }
+}
+
 function startTimer() {
   if (workoutExercises.length === 0) return;
   timerRunning = true;
@@ -337,39 +371,7 @@ function startTimer() {
   document.getElementById("pauseBtn").style.display = "inline-block";
   document.getElementById("resetBtn").style.display = "inline-block";
   document.getElementById("timerImgWrap").classList.add("pulse");
-  timerInterval = setInterval(() => {
-    if (!timerPaused) {
-      timeLeft--;
-      const progress = ((totalTime - timeLeft) / totalTime) * 100;
-      document.getElementById("timerProgress").style.width = `${Math.min(progress, 100)}%`;
-      document.getElementById("timerDisplay").textContent = formatTime(timeLeft);
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        document.getElementById("timerImgWrap").classList.remove("pulse");
-        if (isRest) {
-          isRest = false;
-          currentExIdx++;
-          if (currentExIdx >= workoutExercises.length) { finishWorkout(); return; }
-          prepareTimer();
-          startTimer();
-        } else {
-          markExerciseDone(workoutExercises[currentExIdx].exerciseId);
-          if (currentExIdx + 1 >= workoutExercises.length) { finishWorkout(); return; }
-          playComplete();
-          const nextEx = exercises[workoutExercises[currentExIdx + 1].exerciseId];
-          isRest = true;
-          playRest();
-          timeLeft = nextEx.rest || 15;
-          totalTime = timeLeft;
-          document.getElementById("timerDisplay").textContent = formatTime(timeLeft);
-          document.getElementById("timerPhase").textContent = "💤 راحة";
-          document.getElementById("timerExName").textContent = `${nextEx.icon} ${nextEx.name}`;
-          document.getElementById("timerProgress").style.width = "0%";
-          timerInterval = setInterval(arguments.callee, 1000);
-        }
-      }
-    }
-  }, 1000);
+  timerInterval = setInterval(tick, 1000);
 }
 
 function pauseTimer() {
