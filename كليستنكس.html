@@ -355,9 +355,7 @@ function startTimer() {
         } else {
           markExerciseDone(workoutExercises[currentExIdx].exerciseId);
           if (currentExIdx + 1 >= workoutExercises.length) { finishWorkout(); return; }
-          const nextEx = exercises[workoutExercises[currentExIdx + 1].exerciseId];
           playComplete();
-          if (currentExIdx + 1 >= workoutExercises.length) { finishWorkout(); return; }
           const nextEx = exercises[workoutExercises[currentExIdx + 1].exerciseId];
           isRest = true;
           playRest();
@@ -394,9 +392,17 @@ function formatTime(s) {
 
 // ======================== أصوات تشجيع بنت ورجل ========================
 let audioCtx = null;
+let voicesReady = false;
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
+}
+// تحميل أصوات SpeechSynthesis
+if (window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => { voicesReady = true; };
+  setTimeout(() => voicesReady = true, 2000);
 }
 function playTone(freq, duration, type, vol) {
   try {
@@ -435,7 +441,7 @@ const voicePhrases = {
 };
 function speak(phrases, gender) {
   try {
-    if (!window.speechSynthesis) return;
+    if (!window.speechSynthesis || !voicesReady) return;
     window.speechSynthesis.cancel();
     const msg = new SpeechSynthesisUtterance(phrases[voiceIdx % phrases.length]);
     voiceIdx++;
@@ -443,9 +449,11 @@ function speak(phrases, gender) {
     msg.rate = gender === 'girl' ? 1.2 : 0.9;
     msg.pitch = gender === 'girl' ? 1.5 : 0.7;
     msg.volume = 0.8;
-    const voices = window.speechSynthesis.getVoices();
-    const arVoice = voices.find(v => v.lang.startsWith("ar"));
-    if (arVoice) msg.voice = arVoice;
+    if (voicesReady) {
+      const voices = window.speechSynthesis.getVoices();
+      const arVoice = voices.find(v => v.lang.startsWith("ar"));
+      if (arVoice) msg.voice = arVoice;
+    }
     window.speechSynthesis.speak(msg);
   } catch(e) {}
 }
@@ -575,8 +583,6 @@ function showToast(msg) {
 renderExercises();
 renderPlans();
 renderProgress();
-// تحميل أصوات SpeechSynthesis مبكراً
-if (window.speechSynthesis) window.speechSynthesis.getVoices();
 </script>
 </body>
 </html>
